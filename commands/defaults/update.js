@@ -57,7 +57,7 @@ async function updateLogic(ctx) {
         // 3. Auto-install new packages if any
         await runCmd("npm install");
 
-        await sock.sendMessage(from, { text: "All done! Restarting bot if you initially ran *npm run start*..." });
+        await sock.sendMessage(from, { text: "All done! Restarting bot if you initially ran *npm start / npm run start*... \nElse you would need to restart manually" });
         process.exit(0);
       }
     }
