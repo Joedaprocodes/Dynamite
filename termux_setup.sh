@@ -46,8 +46,10 @@ chmod +x index.js
 
 echo -e "${GREEN}Setup Complete!${NC}"
 echo -e "${CYAN}--------------------------------------------------${NC}"
-echo -e "To see the Pairing code and login, run: ${YELLOW}node index.js${NC}"
-echo -e "To run in background later, run: ${RED}npx pm2 start index.js --name "Dynamite"${NC}"
+echo -e "To see the Pairing code and login, run: ${YELLOW}npm run setup${NC}"
+echo -e "To run in background later, run: ${RED}npm start${NC}"
+echo -e "To check background status, run: ${YELLOW}npm run status${NC}"
+echo -e "To stop the bot, run: ${RED}npm stop${NC}"
 echo -e "${CYAN}--------------------------------------------------${NC}"
 
 sleep 2
