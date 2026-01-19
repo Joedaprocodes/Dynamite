@@ -1,8 +1,8 @@
 const { exec } = require("child_process");
 
 async function updateLogic(ctx) {
-  const { sock, msg, args, isOwner, config } = ctx;
-  const from = msg.key.remoteJid;
+  const { sock, mek, args, isOwner, config } = ctx;
+  const from = mek.key.remoteJid;
   const REPO_URL = config.repo;
 
   if (!isOwner) return;
