@@ -55,4 +55,4 @@ echo -e "${CYAN}--------------------------------------------------${NC}"
 sleep 2
 
 # 6. RUN THE BOT (Foreground first to scan QR)
-node index.js
+npm run setup
