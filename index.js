@@ -113,7 +113,7 @@ const ensureConfigExists = () => {
       botName: "Dynamite",
       cmdPrefix: ".",
       autoread: true,
-      repo: "https://github.com/USERNAME/Dynamite.git",
+      repo: "https://github.com/Joedaprocodes/Dynamite.git",
     },
     "gcconfig.json": {},
     "installedCmds.json": [],
