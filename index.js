@@ -23,7 +23,6 @@ const NodeCache = require("node-cache");
 // 1. Load Configuration
 const { handleMessages } = require("./main.js");
 const { listCommands } = require("./functions.js");
-const config = JSON.parse(readFileSync("./config/config.json", "utf-8"));
 
 /**
  * --- STORE CONFIGURATION ---
@@ -102,10 +101,9 @@ const createStore = () => {
 };
 
 const ensureConfigExists = () => {
-  // Defines the path to the config folder relative to index.js
   const configDir = path.join(__dirname, "config");
+  const configPath = path.join(configDir, "config.json");
 
-  // Default templates for each file
   const templates = {
     "config.json": {
       owner: [],
@@ -119,29 +117,21 @@ const ensureConfigExists = () => {
     "installedCmds.json": [],
   };
 
-  // 1. Create the config directory if it doesn't exist
   if (!existsSync(configDir)) {
-    console.log(
-      chalk.bgGreen.white("[ CREA ]"),
-      "Creating missing config directory...",
-    );
     mkdirSync(configDir, { recursive: true });
   }
 
-  // 2. Check and create each file individually
+  // Create files if they don't exist
   Object.keys(templates).forEach((fileName) => {
     const filePath = path.join(configDir, fileName);
-
     if (!existsSync(filePath)) {
-      console.log(
-        chalk.bgGreen.white("[ CREA ]"),
-        `Creating default ${fileName}...`,
-      );
       writeFileSync(filePath, JSON.stringify(templates[fileName], null, 2));
-    } else {
-      console.log(chalk.bgGreen.white("[ EXIS ]"), `${fileName} exists.`);
+      console.log(chalk.green(`Generated default ${fileName}`));
     }
   });
+
+  // Safely load the config into global scope
+  global.config = JSON.parse(readFileSync(configPath, "utf-8"));
 };
 
 // Execute at startup
@@ -302,7 +292,10 @@ async function startBot() {
           chalk.bgRed.white("[ CONN ]"),
           chalk.red("Logged out. Deleting session..."),
         );
-        rmSync("../session", { recursive: true, force: true });
+        rmSync(path.join(__dirname, "session"), {
+          recursive: true,
+          force: true,
+        });
         process.exit(0);
       }
 
