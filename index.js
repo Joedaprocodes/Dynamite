@@ -65,7 +65,11 @@ const createStore = () => {
         writeFileSync(path, data);
         writeFileSync(groupPath, JSON.stringify(groups, null, 2));
       } catch (err) {
-        console.error(chalk.bgRed.white("[ WRIT ]"), chalk.red("Error saving store:"), err);
+        console.error(
+          chalk.bgRed.white("[ WRIT ]"),
+          chalk.red("Error saving store:"),
+          err,
+        );
       }
     },
     readFromFile: (path, groupPath) => {
@@ -76,7 +80,10 @@ const createStore = () => {
           Object.assign(contacts, data.contacts || {});
           Object.assign(messages, data.messages || {});
         } catch (e) {
-          console.log(chalk.bgRed.white("[ READ ]"), chalk.red("Error reading store file."));
+          console.log(
+            chalk.bgRed.white("[ READ ]"),
+            chalk.red("Error reading store file."),
+          );
         }
       }
       if (existsSync(groupPath)) {
@@ -84,7 +91,10 @@ const createStore = () => {
           const groupData = JSON.parse(readFileSync(groupPath, "utf-8"));
           Object.assign(groups, groupData);
         } catch (e) {
-          console.log(chalk.bgRed.white("[ READ ]"), chalk.red("Error reading group config."));
+          console.log(
+            chalk.bgRed.white("[ READ ]"),
+            chalk.red("Error reading group config."),
+          );
         }
       }
     },
@@ -102,8 +112,8 @@ const ensureConfigExists = () => {
       ownerName: "Joedaprocodes",
       botName: "Dynamite",
       cmdPrefix: ".",
-      typing: true,
       autoread: true,
+      repo: "https://github.com/USERNAME/Dynamite.git",
     },
     "gcconfig.json": {},
     "installedCmds.json": [],
@@ -111,7 +121,10 @@ const ensureConfigExists = () => {
 
   // 1. Create the config directory if it doesn't exist
   if (!existsSync(configDir)) {
-    console.log(chalk.bgGreen.white("[ CREA ]"), "Creating missing config directory...");
+    console.log(
+      chalk.bgGreen.white("[ CREA ]"),
+      "Creating missing config directory...",
+    );
     mkdirSync(configDir, { recursive: true });
   }
 
@@ -120,7 +133,10 @@ const ensureConfigExists = () => {
     const filePath = path.join(configDir, fileName);
 
     if (!existsSync(filePath)) {
-      console.log(chalk.bgGreen.white("[ CREA ]"), `Creating default ${fileName}...`);
+      console.log(
+        chalk.bgGreen.white("[ CREA ]"),
+        `Creating default ${fileName}...`,
+      );
       writeFileSync(filePath, JSON.stringify(templates[fileName], null, 2));
     } else {
       console.log(chalk.bgGreen.white("[ EXIS ]"), `${fileName} exists.`);
@@ -135,7 +151,8 @@ const store = createStore();
 global.store = store;
 
 if (!existsSync("./storage")) mkdirSync("./storage", { recursive: true });
-if (!existsSync("./commands/installed")) mkdirSync("./commands/installed", { recursive: true });
+if (!existsSync("./commands/installed"))
+  mkdirSync("./commands/installed", { recursive: true });
 
 store.readFromFile("./storage/baileys_store.json", "./config/gcconfig.json");
 
@@ -188,7 +205,10 @@ async function startBot() {
   // --- 2. PAIRING CODE LOGIC (Moved outside the listener) ---
   if (!sock.authState.creds.registered && !pairingCodeSent) {
     pairingCodeSent = true;
-    console.log(chalk.bgYellow.white("[ SESS ]"), chalk.yellow("\nNo session found. Preparing login..."));
+    console.log(
+      chalk.bgYellow.white("[ SESS ]"),
+      chalk.yellow("\nNo session found. Preparing login..."),
+    );
 
     // Ask for number immediately
     const phoneNumber = await question(
@@ -220,7 +240,10 @@ async function startBot() {
     const { connection, lastDisconnect } = update;
 
     if (connection === "open") {
-      console.log(chalk.bgGreen.white("[ SUCC ]"), chalk.green(`\n${config.botName} is Online!`));
+      console.log(
+        chalk.bgGreen.white("[ SUCC ]"),
+        chalk.green(`\n${config.botName} is Online!`),
+      );
 
       await sock.sendPresenceUpdate("available");
 
@@ -257,7 +280,10 @@ async function startBot() {
             },
           });
         } catch (e) {
-          console.log(chalk.bgRedBright.white("[ ERRO ]"), chalk.redBright(`Could not notify owner: ${ownerID}`));
+          console.log(
+            chalk.bgRedBright.white("[ ERRO ]"),
+            chalk.redBright(`Could not notify owner: ${ownerID}`),
+          );
         }
       }
     }
@@ -266,16 +292,25 @@ async function startBot() {
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
-      console.log(chalk.bgRed.white("[ CONN ]"), chalk.red(`Connection closed. Status: ${statusCode}`));
+      console.log(
+        chalk.bgRed.white("[ CONN ]"),
+        chalk.red(`Connection closed. Status: ${statusCode}`),
+      );
 
       if (statusCode === DisconnectReason.loggedOut) {
-        console.log(chalk.bgRed.white("[ CONN ]"), chalk.red("Logged out. Deleting session..."));
+        console.log(
+          chalk.bgRed.white("[ CONN ]"),
+          chalk.red("Logged out. Deleting session..."),
+        );
         rmSync("../session", { recursive: true, force: true });
         process.exit(0);
       }
 
       if (shouldReconnect) {
-        console.log(chalk.bgCyan.white("[ CONN ]"), chalk.cyan("Attempting to reconnect..."));
+        console.log(
+          chalk.bgCyan.white("[ CONN ]"),
+          chalk.cyan("Attempting to reconnect..."),
+        );
         setTimeout(() => startBot(), 5000);
       }
     }
@@ -310,7 +345,7 @@ async function startBot() {
             linkwhitelist: [],
             participantsallowedcommands: [],
             badwords: [],
-            userWarns: {}
+            userWarns: {},
           },
         };
       }
@@ -365,7 +400,11 @@ async function startBot() {
         config,
       });
     } catch (err) {
-      console.error(chalk.bgWhite.red("[ EXEC ]"), chalk.red("Upsert Error:"), err);
+      console.error(
+        chalk.bgWhite.red("[ EXEC ]"),
+        chalk.red("Upsert Error:"),
+        err,
+      );
     }
   });
 

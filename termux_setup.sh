@@ -20,6 +20,8 @@ pkg update -y && pkg upgrade -y
 echo -e "${YELLOW}Installing Node.js, Git, and PM2...${NC}"
 pkg install nodejs -y
 pkg install git -y
+git config --global user.email "user@dynamite.com"
+git config --global user.name "Dynamite user"
 pkg install ffmpeg -y 
 npm install -g pm2  # Installs PM2 globally for background running
 
