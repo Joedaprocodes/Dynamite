@@ -1,0 +1,6 @@
+session/
+node_modules/
+config/
+commands/installed/
+storage/files/
+baileys_store.json

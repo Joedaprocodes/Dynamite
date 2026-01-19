@@ -1,0 +1,22 @@
+{
+  "name": "dynamite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "setup": "node index.js",
+    "dev": "nodemon index.js",
+    "start": "pm2 start index.js --name Dynamite",
+    "status": "pm2 status",
+    "stop": "pm2 stop Dynamite"
+  },
+  "keywords": [],
+  "author": "Joedaprocodes - Github",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "baileys": "^7.0.0-rc.9",
+    "chalk": "^4.1.2",
+    "node-cache": "^5.1.2",
+    "pino": "^10.2.0"
+  }
+}
