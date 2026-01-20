@@ -14,7 +14,7 @@ async function gchatLogic({
     store
 }) {
     if (!isGroup) return;
-    
+
     // Authorization Checks
     if (!isUserAdmin && !isOwner) return sock.sendMessage(mek.key.remoteJid, {
         text: "Admins only."
@@ -43,7 +43,9 @@ async function gchatLogic({
             const validKeys = ["antilink", "antibadwords", "welcome", "goodbye"];
 
             if (!key || !validKeys.includes(key)) {
-                return sock.sendMessage(from, { text: `Valid keys: ${validKeys.join(", ")}` });
+                return sock.sendMessage(from, {
+                    text: `Valid keys: ${validKeys.join(", ")}`
+                });
             }
 
             if (value === "on") {
@@ -51,10 +53,14 @@ async function gchatLogic({
             } else if (value === "off") {
                 groupConfig[key] = false;
             } else {
-                return sock.sendMessage(from, { text: `Usage: .gc config ${key} on/off` });
+                return sock.sendMessage(from, {
+                    text: `Usage: .gc config ${key} on/off`
+                });
             }
 
-            await sock.sendMessage(from, { text: `Success! *${key}* is now ${groupConfig[key] ? "ENABLED ✅" : "DISABLED ❌"}` });
+            await sock.sendMessage(from, {
+                text: `Success! *${key}* is now ${groupConfig[key] ? "ENABLED ✅" : "DISABLED ❌"}`
+            });
             break;
         }
 
@@ -153,10 +159,10 @@ async function gchatLogic({
             if (args[1] === "-f") {
                 // STEP 1: Get participants from CACHE ONLY
                 const cachedMetadata = global.groupCache ? global.groupCache.get(from) : null;
-                
+
                 if (!cachedMetadata || !cachedMetadata.participants) {
-                    return sock.sendMessage(from, { 
-                        text: "❌ Error: Group participants not found in cache.\nPlease run *.sync* first to load group data." 
+                    return sock.sendMessage(from, {
+                        text: "❌ Error: Group participants not found in cache.\nPlease run *.sync* first to load group data."
                     });
                 }
 
@@ -207,26 +213,24 @@ async function gchatLogic({
 module.exports = {
     name: 'gc',
     description: 'Advanced Group Administration Tools',
-    usage: `
-*--- MODERATION ---*
-• *.gc mute [mins]* - Close group. Optional: set timer (e.g., .gc mute 30).
-• *.gc unmute* - Open group to all members.
-• *.gc kick [@user/reply]* - Remove a user from the group.
-• *.gc warn [@user/reply]* - Add a strike. At 3 warns, user is kicked.
+    usage: `gc <subcommand>
 
-*--- ADMINISTRATION ---*
-• *.gc mkadmin [@user/reply]* - Promote user to Admin.
-• *.gc rmadmin [@user/reply]* - Demote an Admin to Member.
-• *.gc status* - Show current group settings and protection status.
-• *.gc config [key] [on/off]* - Toggle features (antilink, welcome, etc.).
+*MODERATION*
+> *mute [mins]* : Close group chat
+> *unmute* : Open group chat
+> *kick @user* : Kick member
+> *warn @user* : Warn member
 
-*--- METADATA ---*
-• *.gc setName [text]* - Change the group title.
-• *.gc setDesc [text]* - Change the group description.
+*SETTINGS*
+> *config antilink on/off*
+> *config welcome on/off*
+> *status* : Check settings
 
-*--- DANGER ZONE ---*
-• *.gc disband -f* - Removes all members and leaves the group.
-`,
+*ADMIN*
+> *mkadmin @user* : Promote
+> *rmadmin @user* : Demote
+> *setname <text>* : Change Subject
+> *disband -f* : Destroy group`,
     run: async (ctx) => {
         await gchatLogic(ctx);
     }
