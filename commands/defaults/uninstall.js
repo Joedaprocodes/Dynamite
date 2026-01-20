@@ -24,14 +24,14 @@ module.exports = {
     const fileName = commandName.endsWith(".js")
       ? commandName
       : `${commandName}.js`;
-    const installedDir = path.join(__dirname, "installed");
+    const installedDir = path.join(__dirname, "..", "installed");
     const filePath = path.join(installedDir, fileName);
 
     try {
       // 2. Check if file exists
       if (!fs.existsSync(filePath)) {
         return sock.sendMessage(from, {
-          text: `>Error: The command *${fileName}* was not found in the 'installed' folder.`,
+          text: `> Error: The command *${fileName}* was not found in the 'installed' folder.`,
         });
       }
 
