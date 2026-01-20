@@ -151,7 +151,9 @@ setInterval(() => {
 }, 30_000);
 
 const msgRetryCounterCache = new NodeCache();
-const groupCache = new NodeCache({ stdTTL: 5 * 60, useClones: false });
+const groupCache = new NodeCache({ stdTTL: 60 * 60, useClones: false }); // 1 hour cache
+global.groupCache = groupCache; 
+
 let commandsList;
 let pairingCodeSent = false; // Prevents double-requesting
 
