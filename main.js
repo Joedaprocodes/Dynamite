@@ -18,42 +18,37 @@ async function handleMessages(context) {
     config
   } = context;
 
-  // 1. --- PRE-FETCH ADMIN STATUS ---
-  // 1. --- PRE-FETCH ADMIN STATUS ---
+    // 1. --- CACHED ADMIN STATUS ---
   let isBotAdmin = false;
   let isUserAdmin = false;
 
   if (isGroup) {
-    try {
-      const groupMetadata = await sock.groupMetadata(from);
-      const participants = groupMetadata.participants || [];
+    // Look in our global cache instead of calling the API
+    const groupMetadata = global.groupCache.get(from);
 
-      // Get Bot IDs (Normalize both JID and LID)
+    if (groupMetadata) {
+      const participants = groupMetadata.participants || [];
       const botJid = jidNormalizedUser(sock.user.id);
       const botLid = sock.user.lid ? jidNormalizedUser(sock.user.lid) : null;
       const senderJidNormalized = jidNormalizedUser(senderJid);
 
-      // Find Bot in participants
       const botPart = participants.find((p) => {
         const pId = jidNormalizedUser(p.id);
         return pId === botJid || (botLid && pId === botLid);
       });
 
-      // Find User in participants
       const userPart = participants.find(
         (p) => jidNormalizedUser(p.id) === senderJidNormalized,
       );
 
-      isBotAdmin = !!botPart?.admin; // true if 'admin' or 'superadmin'
+      isBotAdmin = !!botPart?.admin;
       isUserAdmin = !!userPart?.admin;
-
-      console.log(
-        `[DEBUG] BotAdmin: ${isBotAdmin} (via ${botPart ? "Found" : "Not Found"})`,
-      );
-    } catch (e) {
-      console.error("Error fetching admin status:", e);
+    } else {
+      // Optional: Log once that cache is empty
+      // console.log(`[SYSTEM] No metadata for ${from}. Run .gc sync`);
     }
   }
+
 
   // 2. --- ADMIN-AWARE ANTI-LINK LOGIC ---
   if (isGroup && groupConfig?.antilink && isBotAdmin) {
