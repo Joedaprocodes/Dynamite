@@ -172,7 +172,7 @@ setInterval(() => {
 }, 30_000);
 
 const msgRetryCounterCache = new NodeCache();
-const groupCache = new NodeCache({ stdTTL: 60 * 60, useClones: false }); // 1 hour cache
+const groupCache = new NodeCache({ stdTTL: 0, useClones: false }); // 1 hour cache
 global.groupCache = groupCache; 
 
 let commandsList;
