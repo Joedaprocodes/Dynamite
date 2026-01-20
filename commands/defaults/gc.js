@@ -317,15 +317,21 @@ async function gchatLogic({
       break;
 
     case "status": {
+        case "status": {
       const config = store.groups[from].config;
-      const stats =
+      const userWarns = config.userWarns || {}; 
+      const warnLimit = config.warnCount || 3;  
+
+      // CHANGE 'const' TO 'let' HERE
+      let stats = 
         `*Group Settings:*\n\n` +
         `Anti-Link:: ${config.antilink ? "`on`" : "`off`"}\n` +
         `Anti-Badword:: ${config.antibadwords ? "`on`" : "`off`"}\n` +
         `Welcome:: ${config.welcome ? "`on`" : "`off`"}\n` +
-        `Warn Limit:: \`${config.warnCount || 3}\`\n\n`;
+        `Warn Limit:: \`${warnLimit}\`\n\n`;
 
-      stats += `*Member Warnings:*`;
+      stats += `*Member Warnings:*`; // This will now work perfectly
+      
       const warnedJids = Object.keys(userWarns);
       if (warnedJids.length === 0) {
         stats += `\n> No users currently have warnings.`;
@@ -339,12 +345,13 @@ async function gchatLogic({
       await sock.sendMessage(
         from,
         {
-          text: stats,
+          text: stats
         },
-        { quoted: mek },
+        { quoted: mek }
       );
       break;
     }
+
 
     default:
       await sock.sendMessage(
