@@ -41,13 +41,12 @@ module.exports = {
                     recursive: true,
                     force: true
                 });
-                console.log(chalk.bgRed.white("[ AUTH ]"), "Session folder deleted successfully.");
+                console.log(chalk.bgRed.white("[ SESS ] Session folder deleted successfully."));
             }
 
             // 5. Terminate the process
             console.log(chalk.red("Bot logged out by owner. Shutting down..."));
             process.exit(0);
-
         } catch (err) {
             console.error(err);
             await sock.sendMessage(from, {

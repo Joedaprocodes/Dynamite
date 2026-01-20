@@ -43,27 +43,27 @@ const createStore = () => {
     messages,
     groups,
     bind: (ev) => {
-  ev.on("chats.upsert", (newChats) => {
-    newChats.forEach((chat) => chats.set(chat.id, chat));
-  });
-  ev.on("contacts.upsert", (newContacts) => {
-    newContacts.forEach((contact) => {
-      contacts[contact.id] = contact;
-    });
-  });
-  ev.on("messages.upsert", (m) => {
-    const msg = m.messages[0];
-    const jid = msg.key.remoteJid;
-    if (!messages[jid]) messages[jid] = [];
-    
-    messages[jid].push(msg);
-    
-    // LIMIT: Keep only the last 15 messages per chat to prevent storage bloat
-    if (messages[jid].length > 15) {
-      messages[jid].shift(); 
-    }
-  });
-},
+      ev.on("chats.upsert", (newChats) => {
+        newChats.forEach((chat) => chats.set(chat.id, chat));
+      });
+      ev.on("contacts.upsert", (newContacts) => {
+        newContacts.forEach((contact) => {
+          contacts[contact.id] = contact;
+        });
+      });
+      ev.on("messages.upsert", (m) => {
+        const msg = m.messages[0];
+        const jid = msg.key.remoteJid;
+        if (!messages[jid]) messages[jid] = [];
+
+        messages[jid].push(msg);
+
+        // LIMIT: Keep only the last 15 messages per chat to prevent storage bloat
+        if (messages[jid].length > 15) {
+          messages[jid].shift();
+        }
+      });
+    },
 
     writeToFile: (path, groupPath) => {
       try {
@@ -72,12 +72,12 @@ const createStore = () => {
         const cachedMetadata = global.groupCache.mget(cacheKeys);
 
         const data = JSON.stringify(
-          { 
-            chats: Array.from(chats.values()), 
-            contacts, 
+          {
+            chats: Array.from(chats.values()),
+            contacts,
             messages,
             // 2. Include the metadata cache in the save file
-            groupMetadataCache: cachedMetadata 
+            groupMetadataCache: cachedMetadata,
           },
           null,
           2,
@@ -86,75 +86,72 @@ const createStore = () => {
         writeFileSync(groupPath, JSON.stringify(groups, null, 2));
       } catch (err) {
         console.error(
-          chalk.bgRed.white("[ WRIT ]"),
-          chalk.red("Error saving store:"),
+          chalk.red("[ WRIT ] Error saving store:"),
           err,
         );
       }
     },
 
- readFromFile: (path, groupPath) => {
-  // --- 1. HANDLE BAILEYS STORE (Chats, Contacts, Metadata Cache) ---
-  if (existsSync(path)) {
-    try {
-      const rawData = readFileSync(path, "utf-8");
+    readFromFile: (path, groupPath) => {
+      // --- 1. HANDLE BAILEYS STORE (Chats, Contacts, Metadata Cache) ---
+      if (existsSync(path)) {
+        try {
+          const rawData = readFileSync(path, "utf-8");
 
-      // Check if file exists but is empty/invalid to prevent JSON.parse errors
-      if (!rawData || rawData.trim() === "" || rawData === "{}") {
-        console.log(chalk.yellow("[ READ ] Store file is empty. Waiting for first auto-save..."));
-      } else {
-        const data = JSON.parse(rawData);
+          // Check if file exists but is empty/invalid to prevent JSON.parse errors
+          if (!rawData || rawData.trim() === "" || rawData === "{}") {
+            console.log(
+              chalk.yellow("[ READ ] Store file is empty. Waiting for first auto-save..."),
+            );
+          } else {
+            const data = JSON.parse(rawData);
 
-        // Safely load Chats
-        if (Array.isArray(data.chats)) {
-          data.chats.forEach((chat) => chats.set(chat.id, chat));
+            // Safely load Chats
+            if (Array.isArray(data.chats)) {
+              data.chats.forEach((chat) => chats.set(chat.id, chat));
+            }
+
+            // Safely load Contacts and Messages
+            Object.assign(contacts, data.contacts || {});
+            Object.assign(messages, data.messages || {});
+
+            // Safely restore the Group Metadata Cache (The "Brain")
+            if (data.groupMetadataCache) {
+              const cacheEntries = Object.entries(data.groupMetadataCache).map(
+                ([key, val]) => ({
+                  key,
+                  val,
+                }),
+              );
+              global.groupCache.mset(cacheEntries);
+              console.log(
+                chalk.green(`[ CACH ] Restored ${cacheEntries.length} groups from storage.`),
+              );
+            }
+          }
+        } catch (e) {
+          console.log(chalk.red(`[ ERRO ] Failed to parse store file: ${e.message}`));
+          // Optional: uncomment the line below to reset a corrupt file
+          writeFileSync(path, JSON.stringify({ chats: [], contacts: {}, messages: {}, groupMetadataCache: {} }));
         }
+      }
 
-        // Safely load Contacts and Messages
-        Object.assign(contacts, data.contacts || {});
-        Object.assign(messages, data.messages || {});
-
-        // Safely restore the Group Metadata Cache (The "Brain")
-        if (data.groupMetadataCache) {
-          const cacheEntries = Object.entries(data.groupMetadataCache).map(([key, val]) => ({
-            key,
-            val
-          }));
-          global.groupCache.mset(cacheEntries);
+      // --- 2. HANDLE GROUP CONFIG (gcconfig.json) ---
+      if (existsSync(groupPath)) {
+        try {
+          const groupRaw = readFileSync(groupPath, "utf-8");
+          if (groupRaw && groupRaw.trim() !== "" && groupRaw !== "{}") {
+            const groupData = JSON.parse(groupRaw);
+            Object.assign(groups, groupData);
+            console.log(chalk.cyan(`[ READ ] Loaded group configurations.`));
+          }
+        } catch (e) {
           console.log(
-            chalk.bgGreen.black("[ CACH ]"),
-            chalk.green(`Restored ${cacheEntries.length} groups from storage.`)
+            chalk.red(`[ ERRO ] Error reading group config: ${e.message}`),
           );
         }
       }
-    } catch (e) {
-      console.log(
-        chalk.bgRed.white("[ ERRO ]"),
-        chalk.red(`Failed to parse store file: ${e.message}`)
-      );
-      // Optional: uncomment the line below to reset a corrupt file
-      // writeFileSync(path, JSON.stringify({ chats: [], contacts: {}, messages: {}, groupMetadataCache: {} }));
-    }
-  }
-
-  // --- 2. HANDLE GROUP CONFIG (gcconfig.json) ---
-  if (existsSync(groupPath)) {
-    try {
-      const groupRaw = readFileSync(groupPath, "utf-8");
-      if (groupRaw && groupRaw.trim() !== "" && groupRaw !== "{}") {
-        const groupData = JSON.parse(groupRaw);
-        Object.assign(groups, groupData);
-        console.log(chalk.cyan(`[ READ ] Loaded group configurations.`));
-      }
-    } catch (e) {
-      console.log(
-        chalk.bgRed.white("[ ERRO ]"),
-        chalk.red("Error reading group config: " + e.message)
-      );
-    }
-  }
-},
-
+    },
   };
 };
 
@@ -184,7 +181,7 @@ const ensureConfigExists = () => {
     const filePath = path.join(configDir, fileName);
     if (!existsSync(filePath)) {
       writeFileSync(filePath, JSON.stringify(templates[fileName], null, 2));
-      console.log(chalk.green(`Generated default ${fileName}`));
+      console.log(chalk.green(`[ WRIT ] Generated default ${fileName}`));
     }
   });
 
@@ -252,8 +249,7 @@ async function startBot() {
   if (!sock.authState.creds.registered && !pairingCodeSent) {
     pairingCodeSent = true;
     console.log(
-      chalk.bgYellow.white("[ SESS ]"),
-      chalk.yellow("No session found. Preparing login..."),
+      chalk.yellow("[ SESS ] No session found. Preparing login..."),
     );
 
     // Ask for number immediately
@@ -268,12 +264,12 @@ async function startBot() {
         let code = await sock.requestPairingCode(cleanedNumber);
         code = code?.match(/.{1,4}/g)?.join("-") || code;
         console.log(
-          chalk.white("\nYour Pairing Code: ") +
+          chalk.white("[ INFO ] Your Pairing Code: ") +
             chalk.bgWhite.black(` ${code} `),
         );
       } catch (err) {
         console.error(
-          chalk.red("\nError requesting pairing code:"),
+          chalk.red("[ ERRO ] Error requesting pairing code:"),
           err.message,
         );
         pairingCodeSent = false; // Reset so user can try again
@@ -287,8 +283,7 @@ async function startBot() {
 
     if (connection === "open") {
       console.log(
-        chalk.bgGreen.white("[ SUCC ]"),
-        chalk.green(`${config.botName} is Online!`),
+        chalk.green(`[ SUCC ] ${config.botName} is Online!`),
       );
 
       await sock.sendPresenceUpdate("available");
@@ -327,8 +322,7 @@ async function startBot() {
           });
         } catch (e) {
           console.log(
-            chalk.bgRedBright.white("[ ERRO ]"),
-            chalk.redBright(`Could not notify owner: ${ownerID}`),
+            chalk.redBright(`[ ERRO ] Could not notify owner: ${ownerID}`),
           );
         }
       }
@@ -339,14 +333,12 @@ async function startBot() {
       const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
 
       console.log(
-        chalk.bgRed.white("[ CONN ]"),
-        chalk.red(`Connection closed. Status: ${statusCode}`),
+        chalk.red(`[ CONN ] Connection closed. Status: ${statusCode}`),
       );
 
       if (statusCode === DisconnectReason.loggedOut) {
         console.log(
-          chalk.bgRed.white("[ CONN ]"),
-          chalk.red("Logged out. Deleting session..."),
+          chalk.red("[ CONN ] Logged out. Deleting session..."),
         );
         rmSync(path.join(__dirname, "session"), {
           recursive: true,
@@ -357,8 +349,7 @@ async function startBot() {
 
       if (shouldReconnect) {
         console.log(
-          chalk.bgCyan.white("[ CONN ]"),
-          chalk.cyan("Attempting to reconnect..."),
+          chalk.cyan("[ CONN ] Attempting to reconnect..."),
         );
         setTimeout(() => startBot(), 5000);
       }
@@ -374,7 +365,11 @@ async function startBot() {
       const from = mek.key.remoteJid;
       const isGroup = from.endsWith("@g.us");
       const rawSender = isGroup ? mek.key.participant : from;
-      console.log(chalk.blue(`[ MESG ] From: ${from} ${isGroup ? "in group" : "in private"}`))
+      console.log(
+        chalk.blue(
+          `[ MESG ] From: ${from} ${isGroup ? "in group" : "in private"}`,
+        ),
+      );
       if (!rawSender) return;
 
       // Initialize group config
@@ -432,7 +427,7 @@ async function startBot() {
             await sock.sendMessage(from, { text: `*Unknown:* ${command}` });
           return;
         }
-        console.log(chalk.bgWhite.black("COMMAND"), chalk.yellow(command));
+        console.log(chalk.bgWhite.black(`[ CMDS ] ${command}`));
       }
 
       await handleMessages({
@@ -451,8 +446,7 @@ async function startBot() {
       });
     } catch (err) {
       console.error(
-        chalk.bgWhite.red("[ EXEC ]"),
-        chalk.red("Upsert Error:"),
+        chalk.red("[ EXEC ] Upsert Error:"),
         err,
       );
     }
@@ -460,18 +454,21 @@ async function startBot() {
 
   sock.ev.on("creds.update", saveCreds);
   // Automatically sync when the bot joins a new group
-sock.ev.on("groups.upsert", async (groups) => {
+  sock.ev.on("groups.upsert", async (groups) => {
     for (const group of groups) {
-        try {
-            console.log(chalk.cyan(`[AUTO-SYNC] Joined new group: ${group.id}. Fetching metadata...`));
-            const metadata = await sock.groupMetadata(group.id);
-            global.groupCache.set(group.id, metadata);
-        } catch (e) {
-            console.error("Auto-sync failed:", e);
-        }
+      try {
+        console.log(
+          chalk.cyan(
+            `[ SYNC ] Joined new group: ${group.id}. Automatically fetching metadata...`,
+          ),
+        );
+        const metadata = await sock.groupMetadata(group.id);
+        global.groupCache.set(group.id, metadata);
+      } catch (e) {
+        console.error("Auto-sync failed:", e);
+      }
     }
-});
-
+  });
 }
 
 startBot();

@@ -30,7 +30,7 @@ module.exports = {
 
             // 3. Delete the file
             fs.unlinkSync(filePath);
-            console.log(chalk.red(`[ DELETE ] Removed ${fileName}`));
+            console.log(chalk.red(`[ DELE ] Removed ${fileName}`));
 
             // 4. Update the registry (installedCmds.json)
             const registryPath = path.join(__dirname, "../config/installedCmds.json");
