@@ -404,6 +404,19 @@ async function startBot() {
   });
 
   sock.ev.on("creds.update", saveCreds);
+  // Automatically sync when the bot joins a new group
+sock.ev.on("groups.upsert", async (groups) => {
+    for (const group of groups) {
+        try {
+            console.log(chalk.cyan(`[AUTO-SYNC] Joined new group: ${group.id}. Fetching metadata...`));
+            const metadata = await sock.groupMetadata(group.id);
+            global.groupCache.set(group.id, metadata);
+        } catch (e) {
+            console.error("Auto-sync failed:", e);
+        }
+    }
+});
+
 }
 
 startBot();
