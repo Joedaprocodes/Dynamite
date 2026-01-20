@@ -56,8 +56,18 @@ const createStore = () => {
     },
     writeToFile: (path, groupPath) => {
       try {
+        // 1. Get all keys from the group cache
+        const cacheKeys = global.groupCache.keys();
+        const cachedMetadata = global.groupCache.mget(cacheKeys);
+
         const data = JSON.stringify(
-          { chats: Array.from(chats.values()), contacts, messages },
+          { 
+            chats: Array.from(chats.values()), 
+            contacts, 
+            messages,
+            // 2. Include the metadata cache in the save file
+            groupMetadataCache: cachedMetadata 
+          },
           null,
           2,
         );
@@ -71,13 +81,24 @@ const createStore = () => {
         );
       }
     },
-    readFromFile: (path, groupPath) => {
+
+        readFromFile: (path, groupPath) => {
       if (existsSync(path)) {
         try {
           const data = JSON.parse(readFileSync(path, "utf-8"));
           data.chats.forEach((chat) => chats.set(chat.id, chat));
           Object.assign(contacts, data.contacts || {});
           Object.assign(messages, data.messages || {});
+
+          // 3. Reload the group metadata into the global cache
+          if (data.groupMetadataCache) {
+            const cacheEntries = Object.entries(data.groupMetadataCache).map(([key, val]) => ({
+              key,
+              val
+            }));
+            global.groupCache.mset(cacheEntries);
+            console.log(chalk.green(`[ CACHE ] Loaded ${cacheEntries.length} groups from storage.`));
+          }
         } catch (e) {
           console.log(
             chalk.bgRed.white("[ READ ]"),
