@@ -92,6 +92,8 @@ Dynamite uses a structured command system:
 
 | Sub-command              | Description                               |
 | ------------------------ | ----------------------------------------- |
+| `.cmds`                  | See all commands                             |
+| `.update`                  | Update to the latest version                |
 | `.gc status`             | View active protections (Anti-link, etc.) |
 | `.gc config antilink on` | Enable link protection                    |
 | `.gc mute 30`            | Close the group for 30 minutes            |
