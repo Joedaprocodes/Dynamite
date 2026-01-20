@@ -85,10 +85,7 @@ const createStore = () => {
         writeFileSync(path, data);
         writeFileSync(groupPath, JSON.stringify(groups, null, 2));
       } catch (err) {
-        console.error(
-          chalk.red("[ WRIT ] Error saving store:"),
-          err,
-        );
+        console.error(chalk.red("[ WRIT ] Error saving store:"), err);
       }
     },
 
@@ -101,7 +98,9 @@ const createStore = () => {
           // Check if file exists but is empty/invalid to prevent JSON.parse errors
           if (!rawData || rawData.trim() === "" || rawData === "{}") {
             console.log(
-              chalk.yellow("[ READ ] Store file is empty. Waiting for first auto-save..."),
+              chalk.yellow(
+                "[ READ ] Store file is empty. Waiting for first auto-save...",
+              ),
             );
           } else {
             const data = JSON.parse(rawData);
@@ -125,14 +124,26 @@ const createStore = () => {
               );
               global.groupCache.mset(cacheEntries);
               console.log(
-                chalk.green(`[ CACH ] Restored ${cacheEntries.length} groups from storage.`),
+                chalk.green(
+                  `[ CACH ] Restored ${cacheEntries.length} groups from storage.`,
+                ),
               );
             }
           }
         } catch (e) {
-          console.log(chalk.red(`[ ERRO ] Failed to parse store file: ${e.message}`));
+          console.log(
+            chalk.red(`[ ERRO ] Failed to parse store file: ${e.message}`),
+          );
           // Optional: uncomment the line below to reset a corrupt file
-          writeFileSync(path, JSON.stringify({ chats: [], contacts: {}, messages: {}, groupMetadataCache: {} }));
+          writeFileSync(
+            path,
+            JSON.stringify({
+              chats: [],
+              contacts: {},
+              messages: {},
+              groupMetadataCache: {},
+            }),
+          );
         }
       }
 
@@ -165,11 +176,12 @@ const ensureConfigExists = () => {
       ownerName: "Joedaprocodes",
       botName: "Dynamite",
       cmdPrefix: ".",
+      typing: true,
       autoread: true,
       repo: "https://github.com/Joedaprocodes/Dynamite.git",
     },
     "gcconfig.json": {},
-    "installedCmds.json": [],
+    "installedCmds.json": {},
   };
 
   if (!existsSync(configDir)) {
@@ -248,9 +260,7 @@ async function startBot() {
   // --- 2. PAIRING CODE LOGIC (Moved outside the listener) ---
   if (!sock.authState.creds.registered && !pairingCodeSent) {
     pairingCodeSent = true;
-    console.log(
-      chalk.yellow("[ SESS ] No session found. Preparing login..."),
-    );
+    console.log(chalk.yellow("[ SESS ] No session found. Preparing login..."));
 
     // Ask for number immediately
     const phoneNumber = await question(
@@ -282,9 +292,7 @@ async function startBot() {
     const { connection, lastDisconnect } = update;
 
     if (connection === "open") {
-      console.log(
-        chalk.green(`[ SUCC ] ${config.botName} is Online!`),
-      );
+      console.log(chalk.green(`[ SUCC ] ${config.botName} is Online!`));
 
       await sock.sendPresenceUpdate("available");
 
@@ -296,7 +304,8 @@ async function startBot() {
       const bootMsg =
         `*${config.botName} is now Online!* 🚀\n\n` +
         `*Owner:* ${config.ownerName || "Admin"}\n` +
-        `*Prefix:* "${config.cmdPrefix}"\n` +
+        `*Prefix:*  ${config.cmdPrefix}\n` +
+        `*Dev:* Joedaprocodes\n\n` +
         `*Time:* ${new Date().toLocaleString()}`;
 
       // 2. Loop through all owners and send the message
@@ -312,8 +321,8 @@ async function startBot() {
               externalAdReply: {
                 title: config.botName,
                 body: "System Status: Active",
-                // You can change this URL to your own image
-                thumbnailUrl: "https://josh-web361.vercel.app/favicon.ico",
+                thumbnailUrl:
+                  "https://josh-web361.vercel.app/assets/web361-Bi7MlVVT.png",
                 sourceUrl: "https://josh-web361.vercel.app",
                 mediaType: 1,
                 renderLargerThumbnail: true,
@@ -337,9 +346,7 @@ async function startBot() {
       );
 
       if (statusCode === DisconnectReason.loggedOut) {
-        console.log(
-          chalk.red("[ CONN ] Logged out. Deleting session..."),
-        );
+        console.log(chalk.red("[ CONN ] Logged out. Deleting session..."));
         rmSync(path.join(__dirname, "session"), {
           recursive: true,
           force: true,
@@ -348,9 +355,7 @@ async function startBot() {
       }
 
       if (shouldReconnect) {
-        console.log(
-          chalk.cyan("[ CONN ] Attempting to reconnect..."),
-        );
+        console.log(chalk.cyan("[ CONN ] Attempting to reconnect..."));
         setTimeout(() => startBot(), 5000);
       }
     }
@@ -445,10 +450,7 @@ async function startBot() {
         config,
       });
     } catch (err) {
-      console.error(
-        chalk.red("[ EXEC ] Upsert Error:"),
-        err,
-      );
+      console.error(chalk.red("[ EXEC ] Upsert Error:"), err);
     }
   });
 

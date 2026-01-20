@@ -10,11 +10,18 @@ async function shutdownLogic({ sock, mek, isOwner, config }) {
     const botName = config.botName || "Dynamite";
 
     // 3. Notify and Save Store
-    await sock.sendMessage(from, { text: `*Shutting down _${botName}_...* ` }, { quoted: mek });
+    await sock.sendMessage(
+      from,
+      { text: `> *Shutting down _${botName}_...* ` },
+      { quoted: mek },
+    );
 
     // Optional: Force a store save before exiting to prevent data loss
     if (global.store) {
-        global.store.writeToFile("../storage/baileys_store.json", "../config/gcconfig.json");
+      global.store.writeToFile(
+        "../storage/baileys_store.json",
+        "../config/gcconfig.json",
+      );
     }
 
     // 4. Execute PM2 Stop with Delay
@@ -26,10 +33,9 @@ async function shutdownLogic({ sock, mek, isOwner, config }) {
         }
       });
     }, 2000);
-
   } catch (err) {
     console.error("Shutdown Error:", err);
-    await sock.sendMessage(from, { text: "Error: Failed to stop process." });
+    await sock.sendMessage(from, { text: "> Error: Failed to stop process." });
   }
 }
 
@@ -37,6 +43,7 @@ module.exports = {
   name: "shutdown",
   description: "Stops the bot process via PM2",
   usage: ".shutdown",
+  author: "Joedaprocodes",
   run: async (ctx) => {
     await shutdownLogic(ctx);
   },

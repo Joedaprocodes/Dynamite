@@ -2,5 +2,5 @@ session/
 node_modules/
 config/
 commands/installed/
-storage/files/
+# storage/files/
 baileys_store.json

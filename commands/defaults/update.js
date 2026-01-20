@@ -41,9 +41,9 @@ async function updateLogic(ctx) {
           text: "New updates found! Type `.update` to download them.",
         });
       }
-    } else if(!mode) {
+    } else if (!mode) {
       // 2. APPLY UPDATE
-      await sock.sendMessage(from, { text: "Downloading updates..." });
+      await sock.sendMessage(from, { text: "> Downloading updates..." });
 
       // Force pull to overwrite local changes if necessary
       await runCmd("git fetch --all");
@@ -51,19 +51,21 @@ async function updateLogic(ctx) {
 
       if (pullResults.includes("HEAD is now at")) {
         await sock.sendMessage(from, {
-          text: "Update successful! Re-installing dependencies...",
+          text: "> Update successful! Re-installing dependencies...",
         });
 
         // 3. Auto-install new packages if any
         await runCmd("npm install");
 
-        await sock.sendMessage(from, { text: "All done! Restarting bot if you initially ran *npm start / npm run start*... \nElse you would need to restart manually" });
+        await sock.sendMessage(from, {
+          text: "> All done! Restarting bot if you initially ran *npm start / npm run start*... \nElse you would need to restart manually",
+        });
         process.exit(0);
       }
     }
   } catch (err) {
     console.error(err);
-    await sock.sendMessage(from, { text: `Git Error: ${err}` });
+    await sock.sendMessage(from, { text: `> Git Error:\n${err}` });
   }
 }
 
@@ -71,6 +73,7 @@ module.exports = {
   name: "update",
   description: "Update bot from public repository",
   usage: ".update check or .update",
+  author: "Joedaprocodes",
   run: async (ctx) => {
     await updateLogic(ctx);
   },

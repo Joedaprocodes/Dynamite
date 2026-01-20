@@ -31,7 +31,7 @@ async function statusLogic({ sock, mek, isOwner }) {
     `*System RAM:* ${freeRam}GB / ${totalRam}GB Free\n` +
     `*Platform:* ${process.platform} (${os.arch()})\n` +
     `*CPU Load:* ${os.loadavg()[0].toFixed(2)}%\n` +
-    `*Role:* Owner Verified`;
+    `*Role:* Owner`;
   await sock.sendMessage(from, { text: statusText }, { quoted: mek });
 }
 
@@ -39,6 +39,7 @@ module.exports = {
   name: "status",
   description: "Check bot vitals and system performance.",
   usage: ".status",
+  author: "Joedaprocodes",
   run: async (ctx) => {
     // ctx contains { sock, mek, isOwner, etc. }
     await statusLogic(ctx);

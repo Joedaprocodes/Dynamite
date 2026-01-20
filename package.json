@@ -7,6 +7,7 @@
     "dev": "nodemon index.js",
     "start": "pm2 start index.js --name Dynamite",
     "status": "pm2 status",
+    "logs": "pm2 logs Dynamite",
     "stop": "pm2 stop Dynamite"
   },
   "keywords": [],
