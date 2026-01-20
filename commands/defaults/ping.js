@@ -1,17 +1,18 @@
-// Change {sock, msg, args} to {sock, mek, args}
 async function pingLogic({sock, mek, args}) {
-    // Now mek.key.remoteJid will work
     const from = mek.key.remoteJid;
     
-    // Calculate latency
-    const timestamp = mek.messageTimestamp * 1000;
-    const latency = Date.now() - timestamp;
+    // Convert to Number to be safe
+    const timestamp = Number(mek.messageTimestamp) * 1000;
+    
+    // Use Math.max(0, ...) to ensure we never show a negative number
+    const latency = Math.max(0, Date.now() - timestamp);
 
     await sock.sendMessage(from, 
         { text: `Pong! 🏓\nResponse time: ${latency}ms` }, 
         { quoted: mek }
     );
 }
+
 
 module.exports = {
     name: 'ping',
