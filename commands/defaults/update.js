@@ -41,7 +41,7 @@ async function updateLogic(ctx) {
           text: "New updates found! Type `.update` to download them.",
         });
       }
-    } else {
+    } else if(!mode) {
       // 2. APPLY UPDATE
       await sock.sendMessage(from, { text: "Downloading updates..." });
 
