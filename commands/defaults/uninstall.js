@@ -1,65 +1,64 @@
+const axios = require("axios");
 const fs = require("fs");
 const path = require("path");
-const chalk = require("chalk");
 
 module.exports = {
-  name: "uninstall",
-  description: "Deletes an installed command and updates the registry.",
-  usage: ".uninstall [command_name]",
+  name: "install",
+  description: "Installs a command from the official Dynamite command repo.",
+  usage: ".install [command_name]",
   author: "Joedaprocodes",
   run: async (ctx) => {
     const { sock, args, isOwner, from } = ctx;
 
     if (!isOwner) return;
 
-    const commandName = args[0]?.toLowerCase();
-    if (!commandName) {
+    const pluginName = args[0]?.toLowerCase();
+    if (!pluginName) {
       return sock.sendMessage(from, {
-        text: ">Please provide the name of the command to uninstall.\n>Example: .uninstall bible",
+        text: "> Please provide a cmd name. Example: .install bible",
       });
     }
 
-    // 1. Construct the path to the file
-    // We add .js if the user didn't type it
-    const fileName = commandName.endsWith(".js")
-      ? commandName
-      : `${commandName}.js`;
-    const installedDir = path.join(__dirname, "..", "installed");
-    const filePath = path.join(installedDir, fileName);
+    // 1. Define paths once at the top
+    const installDir = path.resolve(__dirname, "..", "installed");
+    const targetPath = path.join(installDir, `${pluginName}.js`);
+
+    // 2. Check existence locally
+    if (fs.existsSync(targetPath)) {
+      return sock.sendMessage(from, { 
+        text: `> *${pluginName}* is already installed. Use .uninstall first to update it.` 
+      });
+    }
+
+    const rawUrl = `https://raw.githubusercontent.com/Joedaprocodes/dynamiteCmds/refs/heads/main/${pluginName}.js`;
 
     try {
-      // 2. Check if file exists
-      if (!fs.existsSync(filePath)) {
-        return sock.sendMessage(from, {
-          text: `> Error: The command *${fileName}* was not found in the 'installed' folder.`,
-        });
+      await sock.sendMessage(from, { text: `> Searching for *${pluginName}*...` });
+
+      const response = await axios.get(rawUrl);
+      const content = response.data;
+
+      if (typeof content !== 'string' || content.includes('<!DOCTYPE html>')) {
+         throw new Error("[ ERRO ] Invalid file content received (Check if file is public).");
       }
 
-      // 3. Delete the file
-      fs.unlinkSync(filePath);
-      console.log(chalk.red(`[ DELE ] Removed ${fileName}`));
+      // 3. Ensure folder exists
+      if (!fs.existsSync(installDir)) {
+        fs.mkdirSync(installDir, { recursive: true });
+      }
 
-      // 4. Update the registry (installedCmds.json)
-      // const registryPath = path.join(__dirname, "../../config/installedCmds.json");
+      // 4. Save using the path we defined earlier
+      fs.writeFileSync(targetPath, content);
 
-      // if (fs.existsSync(registryPath)) {
-      //     let registry = JSON.parse(fs.readFileSync(registryPath, "utf-8"));
-
-      //     // Filter out the deleted command
-      //     const newRegistry = registry.filter(cmd => cmd !== fileName);
-
-      //     fs.writeFileSync(registryPath, JSON.stringify(newRegistry, null, 2));
-      // }
-
-      // 5. Restart to apply changes
       await sock.sendMessage(from, {
-        text: `*> Uninstalled Successfully!* \n\nCommand: \`${fileName}\` has been uninstalled.`,
+        text: `> *Success!* \n\n> cmd *${pluginName}* installed successfully.`,
       });
+
     } catch (err) {
-      console.error(err);
-      await sock.sendMessage(from, {
-        text: `Error deleting file: ${err.message}`,
-      });
+      const msg = err.response?.status === 404 
+        ? `> cmd *${pluginName}* not found in the repo.` 
+        : `> Error: ${err.message}`;
+      await sock.sendMessage(from, { text: msg });
     }
   },
 };
