@@ -37,7 +37,7 @@ else
     echo -e "${YELLOW}Initializing npm and installing core libraries...${NC}"
     npm init -y
     npm install --save --ignore-scripts
-    npm install baileys pino node-cache chalk@4.1.2
+    npm install baileys pino node-cache axios chalk@4.1.2
     npm install -g pm2
 fi
 
@@ -47,8 +47,9 @@ chmod +x index.js
 echo -e "${GREEN}Setup Complete!${NC}"
 echo -e "${CYAN}--------------------------------------------------${NC}"
 echo -e "To see the Pairing code and login, run: ${YELLOW}npm run setup${NC}"
-echo -e "To run in background later, run: ${RED}npm start${NC}"
+echo -e "To run in background later, run: ${YELLOW}npm start${NC}"
 echo -e "To check background status, run: ${YELLOW}npm run status${NC}"
+echo -e "To show logs, run: ${YELLOW}npm run logs${NC}"
 echo -e "To stop the bot, run: ${RED}npm stop${NC}"
 echo -e "${CYAN}--------------------------------------------------${NC}"
 
