@@ -19,6 +19,15 @@ module.exports = {
       });
     }
 
+    const targetFile = path.join(path.resolve(__dirname, "..", "installed"), `${pluginName}.js`);
+
+if (fs.existsSync(targetFile)) {
+    return sock.sendMessage(from, { 
+        text: `> *${pluginName}* is already installed. Use .uninstall first if you want to update it.` 
+    });
+}
+
+
     // 1. Raw URL pointing to your repository
     const rawUrl = `https://raw.githubusercontent.com/Joedaprocodes/dynamiteCmds/refs/heads/main/${pluginName}.js`;
 
