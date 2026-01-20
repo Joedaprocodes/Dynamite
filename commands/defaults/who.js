@@ -10,7 +10,7 @@ module.exports = {
 
     // 1. Permission Check
     // Allow if Owner OR if Group Admin
-    if (!isOwner || !isUserAdmin) {
+    if (!isOwner && !isUserAdmin) {
       return sock.sendMessage(from, {
         text: "Access Denied: Admins or Owner only.",
       });
