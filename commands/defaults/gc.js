@@ -14,6 +14,8 @@ async function gchatLogic({
     store
 }) {
     if (!isGroup) return;
+    
+    // Authorization Checks
     if (!isUserAdmin && !isOwner) return sock.sendMessage(mek.key.remoteJid, {
         text: "Admins only."
     });
@@ -34,6 +36,29 @@ async function gchatLogic({
     };
 
     switch (subCommand) {
+        // 1. CONFIGURATION (Toggles features)
+        case "config": {
+            const key = args[1]?.toLowerCase();
+            const value = args[2]?.toLowerCase();
+            const validKeys = ["antilink", "antibadwords", "welcome", "goodbye"];
+
+            if (!key || !validKeys.includes(key)) {
+                return sock.sendMessage(from, { text: `Valid keys: ${validKeys.join(", ")}` });
+            }
+
+            if (value === "on") {
+                groupConfig[key] = true;
+            } else if (value === "off") {
+                groupConfig[key] = false;
+            } else {
+                return sock.sendMessage(from, { text: `Usage: .gc config ${key} on/off` });
+            }
+
+            await sock.sendMessage(from, { text: `Success! *${key}* is now ${groupConfig[key] ? "ENABLED ✅" : "DISABLED ❌"}` });
+            break;
+        }
+
+        // 2. MUTE/UNMUTE
         case "mute":
             await sock.groupSettingUpdate(from, 'announcement');
             let muteText = "Group muted. Only admins can send messages.";
@@ -61,6 +86,7 @@ async function gchatLogic({
             });
             break;
 
+        // 3. MEMBER MANAGEMENT
         case "kick":
             const toKick = getTargets();
             if (toKick.length === 0) return sock.sendMessage(from, {
@@ -107,6 +133,7 @@ async function gchatLogic({
             await sock.groupParticipantsUpdate(from, toDemote, "demote");
             break;
 
+        // 4. METADATA
         case "setname":
             if (!query) return sock.sendMessage(from, {
                 text: "Provide a name. Usage: .gc setName New Name"
@@ -121,23 +148,40 @@ async function gchatLogic({
             await sock.groupUpdateDescription(from, query);
             break;
 
+        // 5. DANGER ZONE (Cache Based)
         case "disband":
             if (args[1] === "-f") {
-                const groupMetadata = await sock.groupMetadata(from);
-                const participants = groupMetadata.participants.map(p => p.id);
-                // Remove everyone except the bot/owner might be safer, but full disband:
-                await sock.sendMessage(from, {
-                    text: "Disbanding group..."
-                });
-                for (let p of participants) {
-                    if (p !== jidNormalizedUser(sock.user.id)) {
-                        await sock.groupParticipantsUpdate(from, [p], "remove");
-                    }
+                // STEP 1: Get participants from CACHE ONLY
+                const cachedMetadata = global.groupCache ? global.groupCache.get(from) : null;
+                
+                if (!cachedMetadata || !cachedMetadata.participants) {
+                    return sock.sendMessage(from, { 
+                        text: "❌ Error: Group participants not found in cache.\nPlease run *.sync* first to load group data." 
+                    });
                 }
+
+                const botId = jidNormalizedUser(sock.user.id);
+                // Filter out the bot itself
+                const participants = cachedMetadata.participants
+                    .map(p => p.id)
+                    .filter(id => id !== botId);
+
+                await sock.sendMessage(from, {
+                    text: `Disbanding group... Removing ${participants.length} members.`
+                });
+
+                // STEP 2: Safe Batch Removal (5 users per second to avoid overflow)
+                for (let i = 0; i < participants.length; i += 5) {
+                    const batch = participants.slice(i, i + 5);
+                    await sock.groupParticipantsUpdate(from, batch, "remove");
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // 1s delay
+                }
+
+                // STEP 3: Leave
                 await sock.groupLeave(from);
             } else {
                 await sock.sendMessage(from, {
-                    text: "Are you sure? Use `.gc disband -f` to confirm."
+                    text: "⚠️ *WARNING*: This will remove ALL members and delete the group.\nUse *.gc disband -f* to confirm."
                 });
             }
             break;
@@ -155,12 +199,10 @@ async function gchatLogic({
 
         default:
             await sock.sendMessage(from, {
-                text: "Available: mute, unmute, kick, warn, mkadmin, rmadmin, setName, setDesc, status, disband"
+                text: "Available: config, mute, unmute, kick, warn, mkadmin, rmadmin, setName, setDesc, status, disband"
             });
     }
 }
-
-
 
 module.exports = {
     name: 'gc',
@@ -188,4 +230,4 @@ module.exports = {
     run: async (ctx) => {
         await gchatLogic(ctx);
     }
-};>
+};
