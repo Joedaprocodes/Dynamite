@@ -17,12 +17,28 @@ async function shutdownLogic({ sock, mek, isOwner, config }) {
     );
 
     // Optional: Force a store save before exiting to prevent data loss
-    if (global.store) {
-      global.store.writeToFile(
-        "../storage/baileys_store.json",
-        "../config/gcconfig.json",
-      );
-    }
+if (global.store) {
+    // Define absolute paths
+    const storageDir = path.join(__dirname, '../../storage');
+    const configDir = path.join(__dirname, '../../config');
+
+    // Ensure folders exist before writing
+    if (!fs.existsSync(storageDir)) fs.mkdirSync(storageDir, { recursive: true });
+    if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
+
+    const storePath = path.join(storageDir, 'baileys_store.json');
+    const configPath = path.join(configDir, 'gcconfig.json');
+
+    global.store.writeToFile(storePath, configPath);
+}
+
+    
+//    if (global.store) {
+   //   global.store.writeToFile(
+     //   "../storage/baileys_store.json",
+//        "../config/gcconfig.json",
+  //    );
+//    }
 
     // 4. Execute PM2 Stop with Delay
     setTimeout(() => {
