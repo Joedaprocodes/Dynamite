@@ -315,8 +315,8 @@ async function gchatLogic({
         );
       }
       break;
-
-    case "status": {
+  }
+  
         case "status": {
       const config = store.groups[from].config;
       const userWarns = config.userWarns || {}; 
