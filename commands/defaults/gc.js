@@ -51,7 +51,7 @@ async function gchatLogic({
 
       if (!key || !validKeys.includes(key)) {
         return sock.sendMessage(from, {
-          text: `Valid keys: ${validKeys.join(", ")}`,
+          text: `Valid keys to configure are: ${validKeys.join(", ")}`,
         });
       }
 

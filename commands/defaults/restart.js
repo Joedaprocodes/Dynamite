@@ -22,7 +22,7 @@ async function restartLogic({ sock, mek, isOwner }) {
 
     await sock.sendMessage(
       from,
-      { text: `> *Restarting ${botName}...* \n> Please wait a moment.` },
+      { text: `> *Restarting ${botName}...*, Please wait a moment.` },
       { quoted: mek },
     );
 

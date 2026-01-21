@@ -1,8 +1,9 @@
+const { config } = require("process");
 const { listCommands } = require("../../functions.js");
 const path = require("path");
 
 async function cmdsLogic(ctx) {
-  const { sock, mek, isOwner, from, isUserAdmin } = ctx;
+  const { sock, mek, isOwner, from, isUserAdmin, config } = ctx;
 
   if (!isOwner || isUserAdmin) return;
 
@@ -20,7 +21,7 @@ async function cmdsLogic(ctx) {
     let menuText = `*${global.config?.botName || "Dynamite"} Menu*\n\n`;
     menuText += `*Total Commands:* ${totalCommands}\n`;
     menuText += `_Note some commands might be restricted to owners even if not tagged (Owner Only)_\n\n`;
-    menuText += `_Type ${global.config?.cmdPrefix || "."}[command] .usage for help_\n\n`;
+    menuText += `_Type ${global.config?.cmdPrefix || "."}[command] .usage for help_\n`;
 
     const ownerCommands = [
       "clearcache",
@@ -35,19 +36,19 @@ async function cmdsLogic(ctx) {
       "update",
     ];
     // DEFAULTS
-    menuText += "*DEFAULTS:*\n";
+    menuText += "*DEFAULTS:*";
     if (defaultCmds.length === 0) {
       menuText += "_None_\n";
     } else {
-      defaultCmds.sort().forEach((cmd) => (menuText += `▫️ .${cmd} ${ownerCommands.includes(cmd) ? " (Owner Only)" : ""}\n`));
+      defaultCmds.sort().forEach((cmd) => (menuText += `\n> ${config.cmdPrefix}${cmd}${ownerCommands.includes(cmd) ? " (Owner Only)" : ""}`));
     }
 
     // INSTALLED
-    menuText += "\n*INSTALLED:*\n";
+    menuText += "\n*INSTALLED:*";
     if (installedCmds.length === 0) {
       menuText += "_None_\n";
     } else {
-      installedCmds.sort().forEach((cmd) => (menuText += `▫️ .${cmd}\n`));
+      installedCmds.sort().forEach((cmd) => (menuText += `\n> ${config.cmdPrefix}${cmd}`));
     }
 
     await sock.sendMessage(from, { text: menuText }, { quoted: mek });

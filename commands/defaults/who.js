@@ -11,9 +11,10 @@ module.exports = {
     // 1. Permission Check
     // Allow if Owner OR if Group Admin
     if (!isOwner && !isUserAdmin) {
-      return sock.sendMessage(from, {
-        text: "Access Denied: Admins or Owner only.",
-      });
+      return;
+      // return sock.sendMessage(from, {
+      //   text: "Access Denied: Admins or Owner only.",
+      // });
     }
 
     // 2. Determine the Target User
@@ -53,13 +54,13 @@ module.exports = {
     // 5. Send Result
     if (contact.lid) {
       await sock.sendMessage(from, {
-        text: `*User Identity Found*\n\n${contact.lid}`,
+        text: `> *User Identity Found*\n\n${contact.lid}`,
         mentions: [normalizedTarget],
       });
     } else {
       // Fallback if LID is not in cache yet
       await sock.sendMessage(from, {
-        text: `*LID Not Found in Cache but this*\n\n${normalizedTarget})`,
+        text: `> *LID Not Found in Cache but this is an id*\n\n${normalizedTarget}`,
         mentions: [normalizedTarget],
       });
     }

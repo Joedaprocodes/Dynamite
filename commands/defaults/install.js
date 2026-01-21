@@ -4,7 +4,7 @@ const path = require("path");
 
 module.exports = {
   name: "install",
-  description: "Installs a command from the official Dynamite plugin repo.",
+  description: "Installs a command from the official Dynamite command repo.",
   usage: ".install [command_name]",
   author: "Joedaprocodes",
   run: async (ctx) => {
@@ -57,7 +57,7 @@ if (fs.existsSync(targetFile)) {
       fs.writeFileSync(targetPath, content);
 
       await sock.sendMessage(from, {
-        text: `> *Success!* \n\n> cmd *${pluginName}* installed successfully.`,
+        text: `> *Success!*\n> cmd *${pluginName}* installed successfully.`,
       });
 
     } catch (err) {

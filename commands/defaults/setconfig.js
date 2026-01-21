@@ -83,7 +83,7 @@ async function setConfigLogic({ sock, mek, args, isOwner }) {
         }
         break;
       }
-      case "typing": {
+      case "setprefix": {
         if (args[1]) {
           config.cmdPrefix = args[1];
         } else {
@@ -170,7 +170,7 @@ module.exports = {
   name: "setconfig",
   description:
     "Change bot settings and preserve data types (Array, Boolean, String).",
-  usage: ".setconfig mkowner/rmowner/ownername/botname/ <value>",
+  usage: ".setconfig mkowner/rmowner/ownername/botname/setprefix/typing/autoread/repo <value>",
   author: "Joedaprocodes",
   run: async (ctx) => {
     // ctx contains { sock, mek, args, isOwner, etc. }

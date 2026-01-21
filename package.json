@@ -1,6 +1,6 @@
 {
   "name": "dynamite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "setup": "echo 'Only use this command when you want to login' && node index.js",

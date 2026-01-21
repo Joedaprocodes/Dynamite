@@ -14,17 +14,17 @@ async function getConfigLogic({ sock, mek, isOwner, config }) {
   }
 
   try {
-    let response = `*> CURRENT CONFIGURATION*\n\n`;
+    let response = `*CURRENT CONFIGURATIONS*\n\n`;
 
-    response += `\n> Owner(s):: ${config?.owner.join(", ")}`;
-    response += `\n> Owner name:: ${config?.ownerName}`;
-    response += `\n> Bot name:: ${config?.botName}`;
-    response += `\n> Cmd Prefix:: \`${config?.cmdPrefix}\``;
-    response += `\n> Typing:: ${config?.typing ? "`on`" : "`off`"}`;
-    response += `\n> Autoread:: ${config?.autoread ? "`on`" : "`off`"}`;
-    response += `\n> Repo(to get updates):: ${config?.repo}`;
+    response += `\n> Owner(s): ${config?.owner.join(", ")}`;
+    response += `\n> Owner name: ${config?.ownerName}`;
+    response += `\n> Bot name: ${config?.botName}`;
+    response += `\n> Cmd Prefix: \`${config?.cmdPrefix}\``;
+    response += `\n> Typing: ${config?.typing ? "`on`" : "`off`"}`;
+    response += `\n> Autoread: ${config?.autoread ? "`on`" : "`off`"}`;
+    response += `\n> Repo(to get updates): ${config?.repo}`;
 
-    response += "\n\n> To edit these, use the `.setconfig` command.";
+    response += "\n\n_To edit these, use the `.setconfig` command._";
 
     await sock.sendMessage(from, { text: response }, { quoted: mek });
   } catch (err) {

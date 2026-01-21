@@ -222,8 +222,6 @@ async function handleMessages(context) {
   }
   if (!command) return;
   // 4. --- COMMAND HANDLING ---
-  if (config.typing) await sock.sendPresenceUpdate("composing", from);
-
   try {
     const getCommandPath = (cmdName) => {
       const folders = ["defaults", "installed"];
@@ -245,9 +243,10 @@ async function handleMessages(context) {
 
     // .usage logic
     if (args[0]?.toLowerCase() === ".usage") {
-      const usageText = `*Command:* ${cmd.name.toUpperCase()}\n
-      *Usage:* ${config.cmdPrefix}${cmd.usage}
-      *Author:* ${config.cmdPrefix}${cmd?.author || "Unknown"}
+      const usageText = `*Command:*  ${config.cmdPrefix}${command}
+      \n> *Desc:* ${cmd?.description}
+      \n> *Usage:* ${cmd?.usage}
+      \n> *Author:* ${cmd?.author || "Unknown"}
       `;
 
       return await sock.sendMessage(from, { text: usageText }, { quoted: mek });
@@ -263,7 +262,6 @@ async function handleMessages(context) {
   } catch (err) {
     console.error(`[ ERRO ] ${command}:`, err);
   }
-  if (config.typing) await sock.sendPresenceUpdate("paused", from);
 }
 
 module.exports = { handleMessages };

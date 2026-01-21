@@ -24,8 +24,8 @@ module.exports = {
 
       await sock.sendMessage(from, {
         text: `> *Sync Successful*
-                \n\n*Group:* ${metadata.subject}
-                \n*Members:* ${metadata.participants.length}
+                \n\n*Group name:* ${metadata.subject}
+                \n*Members count:* ${metadata.participants.length}
                 \n> Group participants list updated.`,
       });
     } catch (e) {

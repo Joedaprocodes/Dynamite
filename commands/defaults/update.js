@@ -24,21 +24,21 @@ async function updateLogic(ctx) {
     try {
       await runCmd("git rev-parse --is-inside-work-tree");
     } catch {
-      await sock.sendMessage(from, { text: "Initializing Git repository..." });
+      await sock.sendMessage(from, { text: "> Initializing Git repository..." });
       await runCmd("git init");
       await runCmd(`git remote add origin ${REPO_URL}`);
     }
 
     if (mode === "check") {
-      await sock.sendMessage(from, { text: "Checking for updates..." });
+      await sock.sendMessage(from, { text: "> Checking for updates..." });
       await runCmd("git fetch origin main");
       const status = await runCmd("git status -uno");
 
       if (status.includes("Your branch is up to date")) {
-        await sock.sendMessage(from, { text: "Everything is up to date." });
+        await sock.sendMessage(from, { text: "> Everything is up to date." });
       } else {
         await sock.sendMessage(from, {
-          text: "New updates found! Type `.update` to download them.",
+          text: "> New updates found! Type `.update` to download them.",
         });
       }
     } else if (!mode) {
@@ -58,7 +58,7 @@ async function updateLogic(ctx) {
         await runCmd("npm install");
 
         await sock.sendMessage(from, {
-          text: "> All done! Restarting bot if you initially ran *npm start / npm run start*... \nElse you would need to restart manually",
+          text: "> All done! Restarting bot if you initially ran *npm start / npm run start*...",
         });
         process.exit(0);
       }
