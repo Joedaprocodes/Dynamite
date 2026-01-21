@@ -126,7 +126,7 @@ Dynamite uses a structured command system:
 | `.gc rmadmin @user`                | Demotes member from an admin                                                         |
 | `.gc setname <text>`               | Change group name                                                                    |
 | `.gc setdesc <text>`               | Change group description                                                             |
-| `.gc disband -f`                   | (Danger) Clear all members and leave                                                 |
+| `.gc disband`                   | (Danger) Clear all members and leave                                                 |
 
 ### Using the setconfig command (`.setconfig`)
 
