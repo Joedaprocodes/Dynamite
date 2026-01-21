@@ -276,7 +276,7 @@ async function gchatLogic({
           return sock.sendMessage(
             from,
             {
-              text: "> Error: Group participants not found in cache.\nPlease run *.sync* first to load group data.",
+              text: "> Error: Group participants not found in cache.\n> Please run *.sync* first to load group data.",
             },
             { quoted: mek },
           );
@@ -309,7 +309,7 @@ async function gchatLogic({
         await sock.sendMessage(
           from,
           {
-            text: "> *WARNING*: This will remove ALL members and delete the group.\nUse *.gc disband -f* to confirm.",
+            text: "> *WARNING*: This will remove ALL members and delete the group.\n> Use *.gc disband -f* to confirm.",
           },
           { quoted: mek },
         );
